@@ -3,6 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package MAHOALAI;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +15,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
+import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -74,7 +80,37 @@ public class AES {
         }
         return null;
     }
-
+    public  String encryptList(List<RSA> list)
+    {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, key,iv);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(list);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(bos.toByteArray()));
+        }
+        catch (Exception e) {
+            System.out.println("Error while encrypting: "
+                               + e.toString());
+        }
+        return null;
+    }
+    public List<RSA> decryptList(String strToDecrypt) throws IOException, ClassNotFoundException{
+            try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, key,iv);
+            ByteArrayInputStream bis = new ByteArrayInputStream(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            List<RSA> list = (List<RSA>)ois.readObject();
+            return list;
+        }
+        catch (Exception e) {
+            System.out.println("Error while decrypting: "
+                               + e.toString());
+        }
+        return null;    
+    }
     public String getPassword() {
         return password;
     }
